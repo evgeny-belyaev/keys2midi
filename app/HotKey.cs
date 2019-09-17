@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace CSRegisterHotkey
+namespace app
 {
     public class HotKey
     {
@@ -9,7 +9,11 @@ namespace CSRegisterHotkey
         public override string ToString()
         {
             return $"{this.Modifiers}+{this.Key}";
+        }
 
+        public static HotKey Parse(string from)
+        {
+            return new HotKey();
         }
     }
 }

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace CSRegisterHotkey
+namespace app
 {
     static class Program
     {
@@ -13,7 +16,7 @@ namespace CSRegisterHotkey
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new CommandsTranslatorForm());
+            Application.Run(new Form1());
         }
     }
 }
