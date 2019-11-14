@@ -18,6 +18,8 @@ namespace app
         private readonly Config _configuration;
         private HotKeyRegister[] registerers;
 
+        private bool[] _state = new[] {true, false, false, false};
+
         public App(IntPtr handle, Action<string> writeLog)
         {
             _handle = handle;
@@ -37,17 +39,44 @@ namespace app
 
             var midiOut = new MidiOut(deviceId);
 
-            this.registerers = this._configuration.Channels.Select((channel, index) =>
+            this.registerers = this._configuration.Channels.Select((channel, currentChannelIndex) =>
             {
                 try
                 {
-                    var r = new HotKeyRegister(this._handle, index, channel.HotKey.Modifiers, channel.HotKey.Key);
+                    var r = new HotKeyRegister(this._handle, currentChannelIndex, channel.HotKey.Modifiers, channel.HotKey.Key);
                     r.HotKeyPressed += (sender, eventArgs) =>
                     {
-                        var command = channel.Command;
+                        if (this._state[currentChannelIndex])
+                        {
+                            return;
+                        }
+
+
+                        midiOut.SendBuffer(channel.Command);
+
+                        _writeLog("send " + currentChannelIndex);
+
+                        var previousChannelIndex = this._state.Select((b, i) => new { b, i }).Where(o => o.b == true).Select(o => o.i).First();
+                        midiOut.SendBuffer(this._configuration.Channels[previousChannelIndex].Command);
+                        _writeLog("send " + previousChannelIndex);
+
+
+                        foreach (int channelIndex in Enumerable.Range(0, 4))
+                        {
+                            if (channelIndex == currentChannelIndex)
+                            {
+                                this._state[channelIndex] = true;
+                            }
+                            else
+                            {
+                                this._state[channelIndex] = false;
+                            }
+                        }
+
                         var hotKey = channel.HotKey;
-                        midiOut.SendBuffer(command);
-                        _writeLog(hotKey + " sent");
+                        _writeLog(currentChannelIndex + " " + hotKey + " sent, state is " + string.Join(",", this._state));
+
+
                     };
 
                     _writeLog(channel.HotKey + " registered");
