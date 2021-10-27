@@ -46,37 +46,10 @@ namespace app
                     var r = new HotKeyRegister(this._handle, currentChannelIndex, channel.HotKey.Modifiers, channel.HotKey.Key);
                     r.HotKeyPressed += (sender, eventArgs) =>
                     {
-                        if (this._state[currentChannelIndex])
-                        {
-                            return;
-                        }
-
-
                         midiOut.SendBuffer(channel.Command);
 
-                        _writeLog("send " + currentChannelIndex);
-
-                        var previousChannelIndex = this._state.Select((b, i) => new { b, i }).Where(o => o.b == true).Select(o => o.i).First();
-                        midiOut.SendBuffer(this._configuration.Channels[previousChannelIndex].Command);
-                        _writeLog("send " + previousChannelIndex);
-
-
-                        foreach (int channelIndex in Enumerable.Range(0, 4))
-                        {
-                            if (channelIndex == currentChannelIndex)
-                            {
-                                this._state[channelIndex] = true;
-                            }
-                            else
-                            {
-                                this._state[channelIndex] = false;
-                            }
-                        }
-
                         var hotKey = channel.HotKey;
-                        _writeLog(currentChannelIndex + " " + hotKey + " sent, state is " + string.Join(",", this._state));
-
-
+                        _writeLog(currentChannelIndex + " " + hotKey + " sent");
                     };
 
                     _writeLog(channel.HotKey + " registered");
